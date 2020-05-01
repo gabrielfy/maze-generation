@@ -12,7 +12,6 @@ WHITE = (255, 255, 255)
 SIZE = 500
 CELL_SIZE = 20
 WINDOW_SIZE = math.ceil(SIZE / CELL_SIZE)
-FPS = 30
 
 
 class Cell(object):
@@ -22,9 +21,9 @@ class Cell(object):
         self.visited = False
         self.screen = screen
         self.size = size
-        self.borders = [True, True, True, True] # TOP, RIGHT, BOTTOM, LEFT
+        self.borders = [True, True, True, True]  # TOP, RIGHT, BOTTOM, LEFT
         self.border_size = 2
-    
+
     def draw(self):
         if self.visited:
             self._draw_borders()
@@ -35,40 +34,46 @@ class Cell(object):
     def _draw_borders(self):
         row, col = self.row * self.size, self.col * self.size
 
-        if self.borders[0]: # TOP
+        if self.borders[0]:  # TOP
             self._border((row, col), (row, col + self.size))
-        
-        if self.borders[1]: # RIGHT
-            self._border((row, col  + self.size), (row  + self.size, col  + self.size))
-        
-        if self.borders[2]: # BOTTOM
-            self._border((row  + self.size, col), (row  + self.size, col  + self.size))
 
-        if self.borders[3]:# LEFT
-            self._border((row, col), (row  + self.size, col))
+        if self.borders[1]:  # RIGHT
+            self._border((row, col + self.size),
+                         (row + self.size, col + self.size))
+
+        if self.borders[2]:  # BOTTOM
+            self._border((row + self.size, col),
+                         (row + self.size, col + self.size))
+
+        if self.borders[3]:  # LEFT
+            self._border((row, col), (row + self.size, col))
 
     def _border(self, start_pos, end_pos):
-        pygame.draw.line(self.screen, WHITE, start_pos, end_pos, self.border_size)
+        pygame.draw.line(self.screen, WHITE, start_pos,
+                         end_pos, self.border_size)
 
     def _fill(self, color):
-        pygame.draw.rect(self.screen, color, pygame.Rect(self.row * self.size, self.col * self.size, self.size, self.size))
+        pygame.draw.rect(self.screen, color, pygame.Rect(
+            self.row * self.size, self.col * self.size, self.size, self.size))
 
 
 def has_unvisited_neighbors(maze, cell):
     neighbors = []
 
-    if cell.row - 1 >= 0 and not maze[cell.row - 1][cell.col].visited: # TOP
+    if cell.row - 1 >= 0 and not maze[cell.row - 1][cell.col].visited:  # TOP
         neighbors.append(maze[cell.row - 1][cell.col])
-    
-    if cell.col - 1 >= 0 and not maze[cell.row][cell.col - 1].visited: # RIGHT
+
+    if cell.col - 1 >= 0 and not maze[cell.row][cell.col - 1].visited:  # RIGHT
         neighbors.append(maze[cell.row][cell.col - 1])
 
-    if cell.row + 1 < WINDOW_SIZE and not maze[cell.row + 1][cell.col].visited: # BOTTOM
+    # BOTTOM
+    if cell.row + 1 < WINDOW_SIZE and not maze[cell.row + 1][cell.col].visited:
         neighbors.append(maze[cell.row + 1][cell.col])
-    
-    if cell.col + 1 < WINDOW_SIZE and not maze[cell.row][cell.col + 1].visited: # LEFT
+
+    # LEFT
+    if cell.col + 1 < WINDOW_SIZE and not maze[cell.row][cell.col + 1].visited:
         neighbors.append(maze[cell.row][cell.col + 1])
-    
+
     return neighbors
 
 
@@ -95,7 +100,7 @@ if __name__ == '__main__':
     # Define window
     screen = pygame.display.set_mode((SIZE + 2, SIZE + 2))
     pygame.display.set_caption('Maze')
-    
+
     # The clock will be used to control how fast the screen updates
     clock = pygame.time.Clock()
 
@@ -104,8 +109,8 @@ if __name__ == '__main__':
     for i in range(WINDOW_SIZE):
         maze.append([])
         for j in range(WINDOW_SIZE):
-            maze[i].append(Cell(screen, SIZE_CELL, i, j))
-    
+            maze[i].append(Cell(screen, CELL_SIZE, i, j))
+
     # Stack of cells
     stack = []
 
@@ -113,15 +118,15 @@ if __name__ == '__main__':
     current = maze[0][0]
     current.visited = True
     stack.append(current)
-    
+
     running = True
     while running:
 
         # Events
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: # Close window
+            if event.type == pygame.QUIT:  # Close window
                 running = False
-        
+
         # Set background color to black
         screen.fill(BLACK)
 
@@ -129,26 +134,26 @@ if __name__ == '__main__':
         for i in range(WINDOW_SIZE):
             for j in range(WINDOW_SIZE):
                 maze[i][j].draw()
-        
+
         if len(stack) > 0:
             current = stack.pop()
             current.highlight()
-			
+
             neighbours = has_unvisited_neighbors(maze, current)
             if len(neighbours) > 0:
                 neighbour = choice(neighbours)
 
                 stack.append(current)
-                
+
                 neighbour.visited = True
-                
+
                 remove_wall(current, neighbour)
-                
+
                 stack.append(neighbour)
 
         # Update window
         pygame.display.update()
-        
-        clock.tick(FPS)
+
+        clock.tick(30)
 
     pygame.quit()
