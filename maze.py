@@ -11,7 +11,7 @@ WHITE = (255, 255, 255)
 # Define width and height of window
 SIZE = 500
 CELL_SIZE = 20
-WINDOW_SIZE = math.ceil(SIZE / CELL_SIZE)
+NUMBER_OF_CELLS = math.ceil(SIZE / CELL_SIZE)
 
 
 class Cell(object):
@@ -21,7 +21,7 @@ class Cell(object):
         self.visited = False
         self.screen = screen
         self.size = size
-        self.borders = [True, True, True, True]  # TOP, RIGHT, BOTTOM, LEFT
+        self.borders = [True, True, True, True]  # top, right, bottom, left
         self.border_size = 2
 
     def draw(self):
@@ -34,18 +34,22 @@ class Cell(object):
     def _draw_borders(self):
         row, col = self.row * self.size, self.col * self.size
 
-        if self.borders[0]:  # TOP
+        # top
+        if self.borders[0]:
             self._border((row, col), (row, col + self.size))
 
-        if self.borders[1]:  # RIGHT
+        # right
+        if self.borders[1]:
             self._border((row, col + self.size),
                          (row + self.size, col + self.size))
 
-        if self.borders[2]:  # BOTTOM
+        # bottom
+        if self.borders[2]:
             self._border((row + self.size, col),
                          (row + self.size, col + self.size))
 
-        if self.borders[3]:  # LEFT
+        # left
+        if self.borders[3]:
             self._border((row, col), (row + self.size, col))
 
     def _border(self, start_pos, end_pos):
@@ -60,18 +64,20 @@ class Cell(object):
 def has_unvisited_neighbors(maze, cell):
     neighbors = []
 
-    if cell.row - 1 >= 0 and not maze[cell.row - 1][cell.col].visited:  # TOP
+    # top
+    if cell.row - 1 >= 0 and not maze[cell.row - 1][cell.col].visited:
         neighbors.append(maze[cell.row - 1][cell.col])
 
-    if cell.col - 1 >= 0 and not maze[cell.row][cell.col - 1].visited:  # RIGHT
+    # right
+    if cell.col - 1 >= 0 and not maze[cell.row][cell.col - 1].visited:
         neighbors.append(maze[cell.row][cell.col - 1])
 
-    # BOTTOM
-    if cell.row + 1 < WINDOW_SIZE and not maze[cell.row + 1][cell.col].visited:
+    # bottom
+    if cell.row + 1 < NUMBER_OF_CELLS and not maze[cell.row + 1][cell.col].visited:
         neighbors.append(maze[cell.row + 1][cell.col])
 
-    # LEFT
-    if cell.col + 1 < WINDOW_SIZE and not maze[cell.row][cell.col + 1].visited:
+    # left
+    if cell.col + 1 < NUMBER_OF_CELLS and not maze[cell.row][cell.col + 1].visited:
         neighbors.append(maze[cell.row][cell.col + 1])
 
     return neighbors
@@ -106,9 +112,9 @@ if __name__ == '__main__':
 
     # Create matrix of cells
     maze = []
-    for i in range(WINDOW_SIZE):
+    for i in range(NUMBER_OF_CELLS):
         maze.append([])
-        for j in range(WINDOW_SIZE):
+        for j in range(NUMBER_OF_CELLS):
             maze[i].append(Cell(screen, CELL_SIZE, i, j))
 
     # Stack of cells
@@ -131,8 +137,8 @@ if __name__ == '__main__':
         screen.fill(BLACK)
 
         # Draw cells
-        for i in range(WINDOW_SIZE):
-            for j in range(WINDOW_SIZE):
+        for i in range(NUMBER_OF_CELLS):
+            for j in range(NUMBER_OF_CELLS):
                 maze[i][j].draw()
 
         if len(stack) > 0:
