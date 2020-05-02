@@ -1,6 +1,7 @@
-from random import choice, randint
+from random import choice
+from math import ceil
 import pygame
-import math
+
 
 # Define colors
 BLACK = (0, 0, 0)
@@ -10,7 +11,7 @@ WHITE = (255, 255, 255)
 # Define width and height of window
 SIZE = 500
 CELL_SIZE = 20
-NUMBER_OF_CELLS = math.ceil(SIZE / CELL_SIZE)
+NUMBER_OF_CELLS = ceil(SIZE / CELL_SIZE)
 
 
 class Cell(object):
