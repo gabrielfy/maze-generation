@@ -1,6 +1,5 @@
 from random import choice, randint
 import pygame
-import time
 import math
 
 # Define colors
