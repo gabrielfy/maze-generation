@@ -3,18 +3,9 @@ from math import ceil
 import pygame
 
 
-# Define colors
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-WHITE = (255, 255, 255)
-
-# Define width and height of window
-SIZE = 500
-CELL_SIZE = 20
-NUMBER_OF_CELLS = ceil(SIZE / CELL_SIZE)
-
-
 class Cell(object):
+    border_size = 2
+
     def __init__(self, screen, size, row, col):
         self.row = row
         self.col = col
@@ -22,39 +13,48 @@ class Cell(object):
         self.screen = screen
         self.size = size
         self.borders = [True, True, True, True]  # top, right, bottom, left
-        self.border_size = 2
 
     def draw(self):
         if self.visited:
-            self._draw_borders()
+            row, col = self.row * self.size, self.col * self.size
+            # top
+            if self.borders[0]:
+                self._border((row, col), (row, col + self.size))
+            # right
+            if self.borders[1]:
+                self._border((row, col + self.size),
+                             (row + self.size, col + self.size))
+            # bottom
+            if self.borders[2]:
+                self._border((row + self.size, col),
+                             (row + self.size, col + self.size))
+            # left
+            if self.borders[3]:
+                self._border((row, col), (row + self.size, col))
 
     def highlight(self):
-        self._fill(GREEN)
+        self._fill((0, 255, 0))
 
-    def _draw_borders(self):
-        row, col = self.row * self.size, self.col * self.size
+    def remove_wall(self, b):
+        x = self.col - b.col
+        if x == 1:
+            self.borders[3] = False
+            b.borders[1] = False
+        elif x == -1:
+            self.borders[1] = False
+            b.borders[3] = False
 
-        # top
-        if self.borders[0]:
-            self._border((row, col), (row, col + self.size))
-
-        # right
-        if self.borders[1]:
-            self._border((row, col + self.size),
-                         (row + self.size, col + self.size))
-
-        # bottom
-        if self.borders[2]:
-            self._border((row + self.size, col),
-                         (row + self.size, col + self.size))
-
-        # left
-        if self.borders[3]:
-            self._border((row, col), (row + self.size, col))
+        y = self.row - b.row
+        if y == 1:
+            self.borders[0] = False
+            b.borders[2] = False
+        elif y == -1:
+            self.borders[2] = False
+            b.borders[0] = False
 
     def _border(self, start_pos, end_pos):
-        pygame.draw.line(self.screen, WHITE, start_pos,
-                         end_pos, self.border_size)
+        pygame.draw.line(self.screen, (255, 255, 255), start_pos,
+                         end_pos, Cell.border_size)
 
     def _fill(self, color):
         pygame.draw.rect(self.screen, color, pygame.Rect(
@@ -63,62 +63,52 @@ class Cell(object):
 
 def has_unvisited_neighbors(maze, cell):
     neighbors = []
+    number_of_cells = len(maze)
 
     # top
     if cell.row - 1 >= 0 and not maze[cell.row - 1][cell.col].visited:
         neighbors.append(maze[cell.row - 1][cell.col])
-
     # right
     if cell.col - 1 >= 0 and not maze[cell.row][cell.col - 1].visited:
         neighbors.append(maze[cell.row][cell.col - 1])
-
     # bottom
-    if cell.row + 1 < NUMBER_OF_CELLS and not maze[cell.row + 1][cell.col].visited:
+    if cell.row + 1 < number_of_cells and not maze[cell.row + 1][cell.col].visited:
         neighbors.append(maze[cell.row + 1][cell.col])
-
     # left
-    if cell.col + 1 < NUMBER_OF_CELLS and not maze[cell.row][cell.col + 1].visited:
+    if cell.col + 1 < number_of_cells and not maze[cell.row][cell.col + 1].visited:
         neighbors.append(maze[cell.row][cell.col + 1])
 
     return neighbors
 
 
-def remove_wall(a, b):
-    x = a.col - b.col
-    if x == 1:
-        a.borders[3] = False
-        b.borders[1] = False
-    elif x == -1:
-        a.borders[1] = False
-        b.borders[3] = False
+def make_matrix(screen, cell_size):
+    # Create matrix of cells
+    screen_w = screen.get_width()
 
-    y = a.row - b.row
-    if y == 1:
-        a.borders[0] = False
-        b.borders[2] = False
-    elif y == -1:
-        a.borders[2] = False
-        b.borders[0] = False
+    number_of_cells = ceil(screen_w / cell_size)
+    maze = []
+    for i in range(number_of_cells):
+        maze.append([])
+        for j in range(number_of_cells):
+            maze[i].append(
+                Cell(screen, cell_size - ((cell_size + Cell.border_size) / screen_w), i, j))
+
+    return maze
 
 
 if __name__ == '__main__':
 
     # Define window
-    screen = pygame.display.set_mode((SIZE + 2, SIZE + 2))
+    screen = pygame.display.set_mode((500, 500))
     pygame.display.set_caption('Maze')
 
     # The clock will be used to control how fast the screen updates
     clock = pygame.time.Clock()
 
-    # Create matrix of cells
-    maze = []
-    for i in range(NUMBER_OF_CELLS):
-        maze.append([])
-        for j in range(NUMBER_OF_CELLS):
-            maze[i].append(Cell(screen, CELL_SIZE, i, j))
-
     # Stack of cells
     stack = []
+
+    maze = make_matrix(screen, 20)
 
     # Start cell
     current = maze[0][0]
@@ -134,12 +124,12 @@ if __name__ == '__main__':
                 running = False
 
         # Set background color to black
-        screen.fill(BLACK)
+        screen.fill((0, 0, 0))
 
         # Draw cells
-        for i in range(NUMBER_OF_CELLS):
-            for j in range(NUMBER_OF_CELLS):
-                maze[i][j].draw()
+        for row in maze:
+            for cell in row:
+                cell.draw()
 
         if len(stack) > 0:
             current = stack.pop()
@@ -148,13 +138,9 @@ if __name__ == '__main__':
             neighbours = has_unvisited_neighbors(maze, current)
             if len(neighbours) > 0:
                 neighbour = choice(neighbours)
-
-                stack.append(current)
-
                 neighbour.visited = True
-
-                remove_wall(current, neighbour)
-
+                current.remove_wall(neighbour)
+                stack.append(current)
                 stack.append(neighbour)
 
         # Update window
