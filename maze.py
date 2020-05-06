@@ -19,36 +19,36 @@ class Cell(object):
             row, col = self.row * self.size, self.col * self.size
             # top
             if self.borders[0]:
-                self._border((row, col), (row, col + self.size))
+                self._border((row, col), (row + self.size, col))
             # right
             if self.borders[1]:
-                self._border((row, col + self.size),
+                self._border((row + self.size, col),
                              (row + self.size, col + self.size))
             # bottom
             if self.borders[2]:
-                self._border((row + self.size, col),
+                self._border((row, col + self.size),
                              (row + self.size, col + self.size))
             # left
             if self.borders[3]:
-                self._border((row, col), (row + self.size, col))
+                self._border((row, col), (row, col + self.size))
 
     def highlight(self):
         self._fill((0, 255, 0))
 
     def remove_wall(self, b):
-        x = self.col - b.col
-        if x == 1:
+        i = self.row - b.row
+        if i == 1:
             self.borders[3] = False
             b.borders[1] = False
-        elif x == -1:
+        elif i == -1:
             self.borders[1] = False
             b.borders[3] = False
 
-        y = self.row - b.row
-        if y == 1:
+        j = self.col - b.col
+        if j == 1:
             self.borders[0] = False
             b.borders[2] = False
-        elif y == -1:
+        elif j == -1:
             self.borders[2] = False
             b.borders[0] = False
 
