@@ -17,5 +17,5 @@ $ pip3 install requirements.txt
 
 - Run
 ```shell
-$ python maze.py
+$ python3 maze.py
 ```
